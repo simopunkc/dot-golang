@@ -1,0 +1,32 @@
+{
+    "client": "Thunder Client",
+    "environmentName": "dot",
+    "dateExported": "2023-11-09T14:31:48.138Z",
+    "version": "1.0",
+    "variables": [
+        {
+            "name": "port",
+            "value": "9001"
+        },
+        {
+            "name": "host",
+            "value": "127.0.0.1"
+        },
+        {
+            "name": "protokol",
+            "value": "http://"
+        },
+        {
+            "name": "path_news",
+            "value": "blog/news"
+        },
+        {
+            "name": "path_topics",
+            "value": "blog/topics"
+        },
+        {
+            "name": "path_ref_news_topics",
+            "value": "blog/ref/news/topics"
+        }
+    ]
+}

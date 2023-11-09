@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/joho/godotenv v1.5.1
+	github.com/redis/go-redis/v9 v9.3.0
 	gorm.io/driver/mysql v1.5.2
 )
 
@@ -17,15 +18,12 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
-	github.com/redis/go-redis/v9 v9.3.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/tinylib/msgp v1.1.9 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.50.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
 )
 
 require (
