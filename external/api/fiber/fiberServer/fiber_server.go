@@ -37,7 +37,7 @@ func ApiServer() {
 	backendHost := ":" + os.Getenv("BACKEND_PORT")
 
 	config := fiber.Config{
-		ServerHeader:  "Pasuh",
+		ServerHeader:  "Dot",
 		StrictRouting: true,
 		CaseSensitive: true,
 	}
