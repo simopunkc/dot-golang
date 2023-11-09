@@ -21,6 +21,7 @@ CREATE TABLE `ref_news_topics` (
   `news_id` int(10) NOT NULL,
   `topics_id` int(10) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `ref_news_id_topics_id` (`news_id`, `topics_id`),
   FOREIGN KEY (news_id) REFERENCES news (id) ON DELETE CASCADE,
   FOREIGN KEY (topics_id) REFERENCES topics (id) ON DELETE CASCADE
 );
