@@ -6,7 +6,7 @@
     "variables": [
         {
             "name": "port",
-            "value": "9001"
+            "value": "8001"
         },
         {
             "name": "host",

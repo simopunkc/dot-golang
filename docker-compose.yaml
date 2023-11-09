@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  blog-db-container:
+    image: mysql
+    container_name: blog-db
+    ports:
+      - "8011:3306"
+    volumes:
+      - ./external/database/backup/blog.sql:/docker-entrypoint-initdb.d/blog.sql
+    environment:
+      MYSQL_USER: nonroot
+      MYSQL_PASSWORD: nonroot
+      MYSQL_ROOT_PASSWORD: nonroot
+      MYSQL_DATABASE: dot
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "8012"]
+      timeout: 120s
+      retries: 10
+    networks:
+      - mynet
+  blog-cache-container:
+    image: redis
+    tty: true
+    stdin_open: true
+    container_name: blog-cache
+    ports:
+      - "8012:6379"
+    depends_on:
+      blog-db-container:
+        condition: service_healthy
+    networks:
+      - mynet
+  blog-container:
+    build:
+      context: .
+      dockerfile: ./external/deployment/docker/blog-service.Dockerfile
+    container_name: blog-api
+    ports:
+      - "8001:9001"
+    depends_on:
+      blog-db-container:
+        condition: service_healthy
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: bridge

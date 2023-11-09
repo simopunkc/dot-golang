@@ -19,7 +19,19 @@ Setelah itu, atur konfigurasi pada file **.env** agar aplikasi dapat berjalan de
 **3. Cara menjalankan aplikasi**
 
 ```shellscript
-go run cmd/main.go
+docker compose up -d
+```
+
+**4. Akses api**
+
+```shellscript
+curl -I http://localhost:8001
+```
+
+**5. Cara menutup aplikasi**
+
+```shellscript
+docker compose down
 ```
 
 ## Design pattern
