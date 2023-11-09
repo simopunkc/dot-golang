@@ -5,7 +5,7 @@ services:
     image: mysql
     container_name: blog-db
     ports:
-      - "8011:3306"
+      - "8012:3306"
     volumes:
       - ./external/database/backup/blog.sql:/docker-entrypoint-initdb.d/blog.sql
     environment:
@@ -25,7 +25,7 @@ services:
     stdin_open: true
     container_name: blog-cache
     ports:
-      - "8012:6379"
+      - "8013:6379"
     depends_on:
       blog-db-container:
         condition: service_healthy

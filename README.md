@@ -1,34 +1,18 @@
 # dot-golang
 
-**1. Install dependensi**
-
-```shellscript
-go mod tidy
-```
-
-**2. Buat file .env**
-
-Masuk ke direktori projek lalu jalankan perintah berikut di terminal
-
-```shellscript
-cp env.example .env
-```
-
-Setelah itu, atur konfigurasi pada file **.env** agar aplikasi dapat berjalan dengan baik
-
-**3. Cara menjalankan aplikasi**
+**1. Cara menjalankan aplikasi**
 
 ```shellscript
 docker compose up -d
 ```
 
-**4. Akses api**
+**2. Akses api**
 
 ```shellscript
-curl -I http://localhost:8001
+curl -I http://localhost:8001/blog/
 ```
 
-**5. Cara menutup aplikasi**
+**3. Cara menutup aplikasi**
 
 ```shellscript
 docker compose down
