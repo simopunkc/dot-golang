@@ -1,2 +1,7 @@
 # dot-golang
-golang test
+
+**Cara menjalankan aplikasi**
+
+```shellscript
+go run cmd/main.go
+```
