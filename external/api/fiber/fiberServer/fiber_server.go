@@ -22,6 +22,7 @@ import (
 	"dot-golang/external/database/gorm/mysql"
 	"dot-golang/external/database/gorm/repository"
 	"dot-golang/external/database/redis"
+	"dot-golang/internal/constant"
 	"dot-golang/internal/domain"
 	"dot-golang/internal/pkg/util"
 	"dot-golang/internal/service"
@@ -44,16 +45,16 @@ func ApiServer() {
 	app := fiber.New(config)
 
 	eventBus := redis.NewEventBus()
-	postNewsChan := make(chan domain.Event)
-	eventBus.Subscribe("Post News Subscribe", postNewsChan)
-	go redis.PostNewsEventHandler(postNewsChan)
-	blogEvent := redis.NewEventPostNewsService(eventBus)
+	eventChan := make(chan domain.Event)
+	eventBus.Subscribe(constant.EVENT_DELETE_SINGLE_NEWS, eventChan)
 
 	rdb := redis.NewConnectionRedis()
 	blogCache := redis.NewBlogCache(rdb)
 	db := mysql.NewConnectionMysql()
 	blogRepository := repository.NewBlogRepository(db)
+	blogEvent := redis.NewEventService(eventBus)
 	blogUtil := util.NewBlogUtil()
+	go redis.EventConsumer(blogCache, blogUtil, eventChan)
 	blogService := service.NewBlogService(blogCache, blogRepository, blogEvent, blogUtil)
 	blogResponse := fiberResponse.NewBlogResponse(blogUtil)
 	blogValidator := fiberValidator.NewBlogValidator(blogUtil)

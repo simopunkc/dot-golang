@@ -2,6 +2,7 @@ package service
 
 import (
 	"dot-golang/internal/abstraction"
+	"dot-golang/internal/constant"
 	"dot-golang/internal/domain"
 )
 
@@ -18,20 +19,9 @@ func NewBlogService(blogCache abstraction.BlogCache, blogRepo abstraction.BlogRe
 	return &BlogService{blogCache, blogRepo, blogEvent, blogUtil}
 }
 
-const (
-	PREFIX_KEYCACHE_NEWS               = "GetNews"
-	PREFIX_KEYCACHE_NEWS_DRAFTED       = "GetNewsDrafted"
-	PREFIX_KEYCACHE_NEWS_PUBLISHED     = "GetNewsPublished"
-	PREFIX_KEYCACHE_NEWS_DELETED       = "GetNewsDeleted"
-	PREFIX_KEYCACHE_SINGLE_NEWS        = "GetSingleNews"
-	PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS = "GetSingleTopicsNews"
-	PREFIX_KEYCACHE_TOPICS             = "GetTopics"
-	PREFIX_KEYCACHE_SINGLE_TOPICS      = "GetSingleTopics"
-)
-
 func (bs BlogService) GetNews(page int) ([]domain.News, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_NEWS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_NEWS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.News
@@ -48,7 +38,7 @@ func (bs BlogService) GetNews(page int) ([]domain.News, error) {
 
 func (bs BlogService) GetNewsDrafted(page int) ([]domain.News, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_NEWS_DRAFTED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_NEWS_DRAFTED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.News
@@ -65,7 +55,7 @@ func (bs BlogService) GetNewsDrafted(page int) ([]domain.News, error) {
 
 func (bs BlogService) GetNewsPublished(page int) ([]domain.News, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_NEWS_PUBLISHED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_NEWS_PUBLISHED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.News
@@ -82,7 +72,7 @@ func (bs BlogService) GetNewsPublished(page int) ([]domain.News, error) {
 
 func (bs BlogService) GetNewsDeleted(page int) ([]domain.News, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_NEWS_DELETED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_NEWS_DELETED + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.News
@@ -104,20 +94,15 @@ func (bs BlogService) PostNews(new domain.News) error {
 		var err error
 		prefixKey := ""
 		if new.StatusContent == domain.DRAFTED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DRAFTED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DRAFTED
 		} else if new.StatusContent == domain.PUBLISHED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_PUBLISHED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_PUBLISHED
 		} else if new.StatusContent == domain.DELETED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DELETED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DELETED
 		}
 		keyCache := prefixKey + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
 		if err == nil {
-			bs.blogEvent.PostNews(domain.News{
-				Title:         "aku",
-				Content:       "dia",
-				StatusContent: domain.PUBLISHED,
-			})
 			for _, cache := range keys {
 				go bs.blogCache.Del(cache)
 			}
@@ -127,7 +112,7 @@ func (bs BlogService) PostNews(new domain.News) error {
 }
 
 func (bs BlogService) GetSingleNews(id int64) (domain.News, error) {
-	keyCache := PREFIX_KEYCACHE_SINGLE_NEWS + "_" + bs.blogUtil.Int64ToString(id)
+	keyCache := constant.PREFIX_KEYCACHE_SINGLE_NEWS + "_" + bs.blogUtil.Int64ToString(id)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult domain.News
@@ -149,11 +134,11 @@ func (bs BlogService) PutSingleNews(new domain.News) error {
 		var err error
 		prefixKey := ""
 		if new.StatusContent == domain.DRAFTED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DRAFTED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DRAFTED
 		} else if new.StatusContent == domain.PUBLISHED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_PUBLISHED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_PUBLISHED
 		} else if new.StatusContent == domain.DELETED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DELETED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DELETED
 		}
 		keyCache := prefixKey + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
@@ -173,22 +158,18 @@ func (bs BlogService) DeleteSingleNews(id int64) error {
 	}
 	err = bs.blogRepo.DeleteSingleNews(id)
 	if err == nil {
-		keyCache := PREFIX_KEYCACHE_SINGLE_NEWS + "_" + bs.blogUtil.Int64ToString(id)
-		exist := bs.blogCache.Exists(keyCache)
-		if exist && err == nil {
-			bs.blogCache.Del(keyCache)
-		}
+		bs.blogEvent.EventPublisher(constant.EVENT_DELETE_SINGLE_NEWS, dbResult)
 		var keys []string
 		var err error
 		prefixKey := ""
 		if dbResult.StatusContent == domain.DRAFTED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DRAFTED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DRAFTED
 		} else if dbResult.StatusContent == domain.PUBLISHED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_PUBLISHED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_PUBLISHED
 		} else if dbResult.StatusContent == domain.DELETED {
-			prefixKey = PREFIX_KEYCACHE_NEWS_DELETED
+			prefixKey = constant.PREFIX_KEYCACHE_NEWS_DELETED
 		}
-		keyCache = prefixKey + "*"
+		keyCache := prefixKey + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
 		if err == nil {
 			for _, cache := range keys {
@@ -202,7 +183,7 @@ func (bs BlogService) DeleteSingleNews(id int64) error {
 func (bs BlogService) PatchSingleNewsStatusContent(id int64, statusContent domain.StatusContent) error {
 	err := bs.blogRepo.PatchSingleNewsStatusContent(id, statusContent)
 	if err == nil {
-		keyCache := PREFIX_KEYCACHE_SINGLE_NEWS + "_" + bs.blogUtil.Int64ToString(id)
+		keyCache := constant.PREFIX_KEYCACHE_SINGLE_NEWS + "_" + bs.blogUtil.Int64ToString(id)
 		exist := bs.blogCache.Exists(keyCache)
 		if exist {
 			bs.blogCache.Del(keyCache)
@@ -213,7 +194,7 @@ func (bs BlogService) PatchSingleNewsStatusContent(id int64, statusContent domai
 
 func (bs BlogService) GetTopics(page int) ([]domain.Topics, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_TOPICS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_TOPICS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.Topics
@@ -229,7 +210,7 @@ func (bs BlogService) GetTopics(page int) ([]domain.Topics, error) {
 }
 
 func (bs BlogService) GetSingleTopics(id int64) (domain.Topics, error) {
-	keyCache := PREFIX_KEYCACHE_SINGLE_TOPICS + "_" + bs.blogUtil.Int64ToString(id)
+	keyCache := constant.PREFIX_KEYCACHE_SINGLE_TOPICS + "_" + bs.blogUtil.Int64ToString(id)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult domain.Topics
@@ -249,7 +230,7 @@ func (bs BlogService) PostTopics(topic domain.Topics) error {
 	if err == nil {
 		var keys []string
 		var err error
-		keyCache := PREFIX_KEYCACHE_TOPICS + "*"
+		keyCache := constant.PREFIX_KEYCACHE_TOPICS + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
 		if err == nil {
 			for _, cache := range keys {
@@ -263,7 +244,7 @@ func (bs BlogService) PostTopics(topic domain.Topics) error {
 func (bs BlogService) PatchSingleTopicsCategoryName(idTopic int64, categoryName string) error {
 	err := bs.blogRepo.PatchSingleTopicsCategoryName(idTopic, categoryName)
 	if err == nil {
-		keyCache := PREFIX_KEYCACHE_SINGLE_TOPICS + "_" + bs.blogUtil.Int64ToString(idTopic)
+		keyCache := constant.PREFIX_KEYCACHE_SINGLE_TOPICS + "_" + bs.blogUtil.Int64ToString(idTopic)
 		exist := bs.blogCache.Exists(keyCache)
 		if exist {
 			bs.blogCache.Del(keyCache)
@@ -274,7 +255,7 @@ func (bs BlogService) PatchSingleTopicsCategoryName(idTopic int64, categoryName 
 
 func (bs BlogService) GetSingleTopicsNews(idTopic int64, page int) ([]domain.News, error) {
 	limit, offset := bs.blogUtil.GetLimitAndOffset(page)
-	keyCache := PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
+	keyCache := constant.PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "_" + bs.blogUtil.IntToString(limit) + "_" + bs.blogUtil.IntToString(offset)
 	exist := bs.blogCache.Exists(keyCache)
 	cache, err := bs.blogCache.Get(keyCache)
 	var dbResult []domain.News
@@ -294,7 +275,7 @@ func (bs BlogService) PostRefNewsTopics(refNewsTopics domain.RefNewsTopics) erro
 	if err == nil {
 		var keys []string
 		var err error
-		keyCache := PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "*"
+		keyCache := constant.PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
 		if err == nil {
 			for _, cache := range keys {
@@ -310,7 +291,7 @@ func (bs BlogService) DeleteRefNewsTopics(refNewsTopics domain.RefNewsTopics) er
 	if err == nil {
 		var keys []string
 		var err error
-		keyCache := PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "*"
+		keyCache := constant.PREFIX_KEYCACHE_SINGLE_TOPICS_NEWS + "*"
 		keys, err = bs.blogCache.Keys(keyCache)
 		if err == nil {
 			for _, cache := range keys {

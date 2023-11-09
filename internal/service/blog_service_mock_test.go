@@ -1047,8 +1047,8 @@ var _ abstraction.BlogEvent = &BlogEventMock{}
 //
 //		// make and configure a mocked abstraction.BlogEvent
 //		mockedBlogEvent := &BlogEventMock{
-//			PostNewsFunc: func(new domain.News)  {
-//				panic("mock out the PostNews method")
+//			EventPublisherFunc: func(eventType string, data interface{})  {
+//				panic("mock out the EventPublisher method")
 //			},
 //		}
 //
@@ -1057,49 +1057,55 @@ var _ abstraction.BlogEvent = &BlogEventMock{}
 //
 //	}
 type BlogEventMock struct {
-	// PostNewsFunc mocks the PostNews method.
-	PostNewsFunc func(new domain.News)
+	// EventPublisherFunc mocks the EventPublisher method.
+	EventPublisherFunc func(eventType string, data interface{})
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// PostNews holds details about calls to the PostNews method.
-		PostNews []struct {
-			// New is the new argument value.
-			New domain.News
+		// EventPublisher holds details about calls to the EventPublisher method.
+		EventPublisher []struct {
+			// EventType is the eventType argument value.
+			EventType string
+			// Data is the data argument value.
+			Data interface{}
 		}
 	}
-	lockPostNews sync.RWMutex
+	lockEventPublisher sync.RWMutex
 }
 
-// PostNews calls PostNewsFunc.
-func (mock *BlogEventMock) PostNews(new domain.News) {
-	if mock.PostNewsFunc == nil {
-		panic("BlogEventMock.PostNewsFunc: method is nil but BlogEvent.PostNews was just called")
+// EventPublisher calls EventPublisherFunc.
+func (mock *BlogEventMock) EventPublisher(eventType string, data interface{}) {
+	if mock.EventPublisherFunc == nil {
+		panic("BlogEventMock.EventPublisherFunc: method is nil but BlogEvent.EventPublisher was just called")
 	}
 	callInfo := struct {
-		New domain.News
+		EventType string
+		Data      interface{}
 	}{
-		New: new,
+		EventType: eventType,
+		Data:      data,
 	}
-	mock.lockPostNews.Lock()
-	mock.calls.PostNews = append(mock.calls.PostNews, callInfo)
-	mock.lockPostNews.Unlock()
-	mock.PostNewsFunc(new)
+	mock.lockEventPublisher.Lock()
+	mock.calls.EventPublisher = append(mock.calls.EventPublisher, callInfo)
+	mock.lockEventPublisher.Unlock()
+	mock.EventPublisherFunc(eventType, data)
 }
 
-// PostNewsCalls gets all the calls that were made to PostNews.
+// EventPublisherCalls gets all the calls that were made to EventPublisher.
 // Check the length with:
 //
-//	len(mockedBlogEvent.PostNewsCalls())
-func (mock *BlogEventMock) PostNewsCalls() []struct {
-	New domain.News
+//	len(mockedBlogEvent.EventPublisherCalls())
+func (mock *BlogEventMock) EventPublisherCalls() []struct {
+	EventType string
+	Data      interface{}
 } {
 	var calls []struct {
-		New domain.News
+		EventType string
+		Data      interface{}
 	}
-	mock.lockPostNews.RLock()
-	calls = mock.calls.PostNews
-	mock.lockPostNews.RUnlock()
+	mock.lockEventPublisher.RLock()
+	calls = mock.calls.EventPublisher
+	mock.lockEventPublisher.RUnlock()
 	return calls
 }
 
